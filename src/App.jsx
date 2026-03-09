@@ -10,12 +10,7 @@ import CustomerDashboard from './pages/client/CustomerDashboard'
 import MerchantDashboard from './pages/dashboard/MerchantDashboard'
 
 function HomeRedirect() {
-  const { user, profile, loading } = useAuth()
-  if (loading) return (
-    <div style={{minHeight:'100vh',display:'flex',alignItems:'center',justifyContent:'center'}}>
-      <div style={{width:32,height:32,border:'2px solid #fed7aa',borderTopColor:'#f97316',borderRadius:'50%',animation:'spin 1s linear infinite'}} />
-    </div>
-  )
+  const { user, profile } = useAuth()
   if (!user) return <Landing />
   if (profile?.role === 'merchant') return <Navigate to="/dashboard" replace />
   if (profile?.role === 'customer') return <Navigate to="/client" replace />
