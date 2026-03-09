@@ -15,13 +15,13 @@ export default function Landing() {
     { icon: QrCode, title: 'QR Code fidélité', desc: 'Générez un QR code unique pour votre commerce. Vos clients le scannent et rejoignent votre programme en quelques secondes.', color: '#fff7ed', iconColor: '#f97316' },
     { icon: Sparkles, title: 'Points automatiques', desc: 'Définissez vos règles de points (ex: 1€ = 1 point). Les points sont attribués automatiquement à chaque visite.', color: '#fffbeb', iconColor: '#f59e0b' },
     { icon: Gift, title: 'Récompenses personnalisées', desc: 'Créez des récompenses attractives : café offert, remise, produit gratuit… Vos clients les débloquent avec leurs points.', color: '#fff1f2', iconColor: '#f43f5e' },
-    { icon: BarChart3, title: 'Dashboard commerçant', desc: 'Suivez vos clients, leurs points et l\'activité de votre programme de fidélité en temps réel.', color: '#eff6ff', iconColor: '#3b82f6' },
+    { icon: BarChart3, title: 'Dashboard commerçant', desc: "Suivez vos clients, leurs points et l'activité de votre programme de fidélité en temps réel.", color: '#eff6ff', iconColor: '#3b82f6' },
   ]
 
   const testimonials = [
-    { name: 'Boulangerie Martin', text: 'Mes clients reviennent beaucoup plus souvent depuis que j\'utilise Loyalty Loop. Mon CA a augmenté de 20%.', avatar: '🥐' },
-    { name: 'Café Central', text: 'Simple et efficace. En 10 minutes j\'avais mon programme de fidélité en place et mes premiers clients inscrits.', avatar: '☕' },
-    { name: 'Barber Shop Elite', text: 'Le meilleur outil fidélité que j\'ai testé. L\'interface est claire et mes clients adorent le système de points.', avatar: '✂️' },
+    { name: 'Boulangerie Martin', text: "Mes clients reviennent beaucoup plus souvent depuis que j'utilise Loyalty Loop. Mon CA a augmenté de 20%.", avatar: '🥐' },
+    { name: 'Café Central', text: "Simple et efficace. En 10 minutes j'avais mon programme de fidélité en place et mes premiers clients inscrits.", avatar: '☕' },
+    { name: 'Barber Shop Elite', text: "Le meilleur outil fidélité que j'ai testé. L'interface est claire et mes clients adorent le système de points.", avatar: '✂️' },
   ]
 
   const plans = [
@@ -44,14 +44,16 @@ export default function Landing() {
   return (
     <div style={{minHeight:'100vh',background:'white'}}>
 
+      {/* NAVBAR */}
       <nav style={{position:'fixed',top:0,left:0,right:0,zIndex:50,display:'flex',alignItems:'center',justifyContent:'space-between',padding:'16px 24px',background:'rgba(255,255,255,0.85)',backdropFilter:'blur(12px)',borderBottom:'1px solid #f5f5f4'}}>
         <Logo />
         <div style={{display:'flex',alignItems:'center',gap:12}}>
           <button onClick={() => navigate('/login')} className="btn-secondary" style={{padding:'8px 16px'}}>Connexion</button>
-          <button onClick={() => navigate('/signup')} className="btn-primary" style={{padding:'8px 16px'}}>Essai gratuit</button>
+          <button onClick={() => navigate('/pricing')} className="btn-primary" style={{padding:'8px 16px'}}>Essai gratuit</button>
         </div>
       </nav>
 
+      {/* HERO */}
       <section style={{position:'relative',overflow:'hidden',paddingTop:128,paddingBottom:96,paddingLeft:24,paddingRight:24}}>
         <div className="blob" style={{width:384,height:384,background:'#fb923c',top:0,right:0,transform:'translate(50%,-25%)'}} />
         <div className="blob" style={{width:288,height:288,background:'#fcd34d',bottom:0,left:0,transform:'translate(-33%,0)'}} />
@@ -76,7 +78,7 @@ export default function Landing() {
             ))}
           </div>
           <div style={{display:'flex',flexWrap:'wrap',gap:12,justifyContent:'center'}}>
-            <button onClick={() => navigate('/signup')} className="btn-primary" style={{fontSize:16,padding:'14px 32px'}}>
+            <button onClick={() => navigate('/pricing')} className="btn-primary" style={{fontSize:16,padding:'14px 32px'}}>
               Essai gratuit <ArrowRight style={{width:16,height:16}} />
             </button>
             <button onClick={() => navigate('/login')} className="btn-secondary" style={{fontSize:16,padding:'14px 32px'}}>
@@ -86,6 +88,7 @@ export default function Landing() {
         </div>
       </section>
 
+      {/* FEATURES */}
       <section style={{padding:'96px 24px',background:'#fafaf9'}}>
         <div style={{maxWidth:960,margin:'0 auto'}}>
           <div style={{textAlign:'center',marginBottom:64}}>
@@ -106,6 +109,7 @@ export default function Landing() {
         </div>
       </section>
 
+      {/* COMMENT CA MARCHE */}
       <section style={{padding:'96px 24px'}}>
         <div style={{maxWidth:960,margin:'0 auto'}}>
           <div style={{textAlign:'center',marginBottom:64}}>
@@ -125,7 +129,7 @@ export default function Landing() {
             ))}
           </div>
           <div style={{textAlign:'center',marginTop:48}}>
-            <button onClick={() => navigate('/signup')} className="btn-primary" style={{fontSize:16,padding:'14px 32px'}}>
+            <button onClick={() => navigate('/pricing')} className="btn-primary" style={{fontSize:16,padding:'14px 32px'}}>
               Commencer gratuitement <ArrowRight style={{width:16,height:16}} />
             </button>
             <p style={{fontSize:13,color:'#a8a29e',marginTop:12}}>15 jours gratuits · Sans carte bancaire · Sans engagement</p>
@@ -133,6 +137,7 @@ export default function Landing() {
         </div>
       </section>
 
+      {/* PRICING */}
       <section style={{padding:'96px 24px',background:'#fafaf9'}}>
         <div style={{maxWidth:768,margin:'0 auto'}}>
           <div style={{textAlign:'center',marginBottom:64}}>
@@ -160,7 +165,7 @@ export default function Landing() {
                     </li>
                   ))}
                 </ul>
-                <button onClick={() => navigate('/signup')} style={{width:'100%',padding:12,borderRadius:12,fontWeight:600,fontSize:14,cursor:'pointer',border:'none',background:plan.highlight?'white':'#f97316',color:plan.highlight?'#ea580c':'white'}}>
+                <button onClick={() => navigate('/pricing')} style={{width:'100%',padding:12,borderRadius:12,fontWeight:600,fontSize:14,cursor:'pointer',border:'none',background:plan.highlight?'white':'#f97316',color:plan.highlight?'#ea580c':'white'}}>
                   Essai gratuit 15 jours
                 </button>
               </div>
@@ -169,6 +174,7 @@ export default function Landing() {
         </div>
       </section>
 
+      {/* TESTIMONIALS */}
       <section style={{padding:'96px 24px'}}>
         <div style={{maxWidth:960,margin:'0 auto'}}>
           <div style={{textAlign:'center',marginBottom:64}}>
@@ -189,19 +195,21 @@ export default function Landing() {
         </div>
       </section>
 
+      {/* CTA */}
       <section style={{padding:'96px 24px',background:'#fafaf9'}}>
         <div style={{maxWidth:640,margin:'0 auto',textAlign:'center'}}>
           <div style={{background:'linear-gradient(135deg,#f97316,#ea580c)',borderRadius:24,padding:64,position:'relative',overflow:'hidden'}}>
             <TrendingUp style={{width:48,height:48,color:'#fed7aa',margin:'0 auto 16px'}} />
             <h2 style={{fontSize:28,fontWeight:800,color:'white',marginBottom:12}}>Prêt à fidéliser vos clients ?</h2>
             <p style={{color:'#fed7aa',marginBottom:32}}>15 jours gratuits, sans engagement.</p>
-            <button onClick={() => navigate('/signup')} style={{display:'inline-flex',alignItems:'center',gap:8,padding:'14px 32px',background:'white',color:'#ea580c',fontWeight:700,borderRadius:12,border:'none',cursor:'pointer',fontSize:16}}>
+            <button onClick={() => navigate('/pricing')} style={{display:'inline-flex',alignItems:'center',gap:8,padding:'14px 32px',background:'white',color:'#ea580c',fontWeight:700,borderRadius:12,border:'none',cursor:'pointer',fontSize:16}}>
               Essai gratuit <ChevronRight style={{width:16,height:16}} />
             </button>
           </div>
         </div>
       </section>
 
+      {/* FOOTER */}
       <footer style={{borderTop:'1px solid #f5f5f4',padding:'32px 24px'}}>
         <div style={{maxWidth:960,margin:'0 auto',display:'flex',flexWrap:'wrap',alignItems:'center',justifyContent:'space-between',gap:16}}>
           <Logo />
