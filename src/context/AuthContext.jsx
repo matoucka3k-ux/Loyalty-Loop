@@ -7,7 +7,7 @@ export function AuthProvider({ children }) {
   const [user, setUser] = useState(null)
   const [profile, setProfile] = useState(null)
   const [merchant, setMerchant] = useState(null)
-  const [loading, setLoading] = useState(true)
+  const [loading, setLoading] = useState(false)
 
   const loadProfile = async (userId) => {
     try {
@@ -29,22 +29,14 @@ export function AuthProvider({ children }) {
       }
     } catch (error) {
       console.error('Error loading profile:', error)
-    } finally {
-      setLoading(false)
     }
   }
 
   useEffect(() => {
     supabase.auth.getSession().then(({ data: { session } }) => {
       setUser(session?.user ?? null)
-      if (session?.user) {
-        loadProfile(session.user.id)
-      } else {
-        setLoading(false)
-      }
-    }).catch(() => {
-      setLoading(false)
-    })
+      if (session?.user) loadProfile(session.user.id)
+    }).catch(() => {})
 
     const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
       setUser(session?.user ?? null)
@@ -53,7 +45,6 @@ export function AuthProvider({ children }) {
       } else {
         setProfile(null)
         setMerchant(null)
-        setLoading(false)
       }
     })
 
@@ -63,13 +54,12 @@ export function AuthProvider({ children }) {
   const signUpMerchant = async ({ email, password, fullName, businessName }) => {
     const { data, error } = await supabase.auth.signUp({ email, password })
     if (error) throw error
-    await supabase.from('profiles').insert({ id: data.user.id, email, role: 'merchant', full_name: fullName })
     const slug = businessName.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '') + '-' + Date.now()
+    await supabase.from('profiles').insert({ id: data.user.id, email, role: 'merchant', full_name: fullName })
     const { data: merchantData } = await supabase.from('merchants').insert({ user_id: data.user.id, business_name: businessName, points_per_euro: 1, slug }).select().single()
-    setMerchant(merchantData)
-    setProfile({ id: data.user.id, email, role: 'merchant', full_name: fullName })
     setUser(data.user)
-    window.location.href = '/onboarding'
+    setProfile({ id: data.user.id, email, role: 'merchant', full_name: fullName })
+    setMerchant(merchantData)
     return data
   }
 
@@ -116,4 +106,3 @@ export const useAuth = () => {
   if (!ctx) throw new Error('useAuth must be used within AuthProvider')
   return ctx
 }
-
