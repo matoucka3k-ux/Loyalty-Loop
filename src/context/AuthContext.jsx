@@ -69,6 +69,7 @@ export function AuthProvider({ children }) {
     setMerchant(merchantData)
     setProfile({ id: data.user.id, email, role: 'merchant', full_name: fullName })
     setUser(data.user)
+    window.location.href = '/onboarding'
     return data
   }
 
@@ -115,3 +116,4 @@ export const useAuth = () => {
   if (!ctx) throw new Error('useAuth must be used within AuthProvider')
   return ctx
 }
+
