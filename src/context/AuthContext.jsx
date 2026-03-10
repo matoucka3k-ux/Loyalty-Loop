@@ -50,15 +50,35 @@ export function AuthProvider({ children }) {
   }, [])
 
   const signUpMerchant = async ({ email, password, fullName, businessName }) => {
-    const { data, error } = await supabase.auth.signUp({ email, password })
-    if (error) throw error
-    const slug = businessName.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '') + '-' + Date.now()
-    await supabase.from('profiles').insert({ id: data.user.id, email, role: 'merchant', full_name: fullName })
-    const { data: merchantData } = await supabase.from('merchants').insert({ user_id: data.user.id, business_name: businessName, points_per_euro: 1, slug }).select().single()
-    setUser(data.user)
-    setProfile({ id: data.user.id, email, role: 'merchant', full_name: fullName })
-    setMerchant(merchantData)
-    return data
+    try {
+      alert('Étape 1 : tentative inscription Supabase...')
+      const { data, error } = await supabase.auth.signUp({ email, password })
+      if (error) {
+        alert('Erreur auth: ' + error.message)
+        throw error
+      }
+      alert('Étape 2 : auth ok, insertion profil...')
+      const slug = businessName.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '') + '-' + Date.now()
+      const { error: profileError } = await supabase.from('profiles').insert({ id: data.user.id, email, role: 'merchant', full_name: fullName })
+      if (profileError) {
+        alert('Erreur profil: ' + profileError.message)
+        throw profileError
+      }
+      alert('Étape 3 : profil ok, insertion merchant...')
+      const { data: merchantData, error: merchantError } = await supabase.from('merchants').insert({ user_id: data.user.id, business_name: businessName, points_per_euro: 1, slug }).select().single()
+      if (merchantError) {
+        alert('Erreur merchant: ' + merchantError.message)
+        throw merchantError
+      }
+      alert('Étape 4 : tout ok ! Redirection...')
+      setUser(data.user)
+      setProfile({ id: data.user.id, email, role: 'merchant', full_name: fullName })
+      setMerchant(merchantData)
+      return data
+    } catch (e) {
+      alert('Erreur globale: ' + e.message)
+      throw e
+    }
   }
 
   const signUpCustomer = async ({ email, password, fullName, merchantId }) => {
@@ -104,4 +124,5 @@ export const useAuth = () => {
   if (!ctx) throw new Error('useAuth must be used within AuthProvider')
   return ctx
 }
+
 
