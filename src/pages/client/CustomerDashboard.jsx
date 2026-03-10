@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react'
 import { useAuth } from '../../context/AuthContext'
 import { supabase } from '../../lib/supabase'
-import { Star, Gift, Clock, LogOut, ChevronRight } from 'lucide-react'
+import { LogOut, ChevronRight } from 'lucide-react'
 import Logo from '../../components/ui/Logo'
 
 export default function CustomerDashboard() {
@@ -23,14 +23,12 @@ export default function CustomerDashboard() {
       if (customer) {
         setCustomerData(customer)
         setMerchantName(customer.merchants?.business_name || '')
-
         const { data: rewardsData } = await supabase
           .from('rewards')
           .select('*')
           .eq('merchant_id', customer.merchant_id)
           .eq('is_active', true)
         setRewards(rewardsData || [])
-
         const { data: transactionsData } = await supabase
           .from('transactions')
           .select('*')
@@ -49,7 +47,6 @@ export default function CustomerDashboard() {
   return (
     <div style={{minHeight:'100vh',background:'#fafaf9',maxWidth:480,margin:'0 auto',position:'relative',paddingBottom:80}}>
 
-      {/* HEADER */}
       <div style={{background:'linear-gradient(135deg,#f97316,#ea580c)',padding:'24px 20px 48px'}}>
         <div style={{display:'flex',alignItems:'center',justifyContent:'space-between',marginBottom:24}}>
           <Logo light size="sm" />
@@ -62,13 +59,10 @@ export default function CustomerDashboard() {
         <p style={{color:'#fed7aa',fontSize:13}}>{merchantName}</p>
       </div>
 
-      {/* CONTENT */}
       <div style={{padding:'0 16px',marginTop:-24}}>
 
-        {/* HOME TAB */}
         {tab === 'home' && (
           <div>
-            {/* PROGRESS CARD */}
             <div style={{background:'white',borderRadius:20,padding:24,marginBottom:16,boxShadow:'0 4px 20px -8px rgba(0,0,0,0.1)'}}>
               {nextReward ? (
                 <>
@@ -96,7 +90,6 @@ export default function CustomerDashboard() {
               )}
             </div>
 
-            {/* REWARDS PREVIEW */}
             {rewards.length > 0 && (
               <div style={{background:'white',borderRadius:20,padding:24,marginBottom:16,boxShadow:'0 4px 20px -8px rgba(0,0,0,0.1)'}}>
                 <div style={{display:'flex',justifyContent:'space-between',alignItems:'center',marginBottom:16}}>
@@ -124,7 +117,6 @@ export default function CustomerDashboard() {
               </div>
             )}
 
-            {/* EMPTY STATE */}
             {rewards.length === 0 && (
               <div style={{background:'white',borderRadius:20,padding:32,textAlign:'center',boxShadow:'0 4px 20px -8px rgba(0,0,0,0.1)'}}>
                 <span style={{fontSize:40}}>⭐</span>
@@ -135,7 +127,6 @@ export default function CustomerDashboard() {
           </div>
         )}
 
-        {/* REWARDS TAB */}
         {tab === 'rewards' && (
           <div>
             <h2 style={{fontSize:18,fontWeight:800,color:'#1c1917',margin:'24px 0 16px'}}>Récompenses</h2>
@@ -182,7 +173,6 @@ export default function CustomerDashboard() {
           </div>
         )}
 
-        {/* HISTORY TAB */}
         {tab === 'history' && (
           <div>
             <h2 style={{fontSize:18,fontWeight:800,color:'#1c1917',margin:'24px 0 16px'}}>Historique</h2>
@@ -214,9 +204,9 @@ export default function CustomerDashboard() {
             )}
           </div>
         )}
+
       </div>
 
-      {/* BOTTOM NAV */}
       <div style={{position:'fixed',bottom:0,left:'50%',transform:'translateX(-50%)',width:'100%',maxWidth:480,background:'white',borderTop:'1px solid #f5f5f4',display:'flex',padding:'8px 0'}}>
         {[
           { id:'home', icon:'🏠', label:'Accueil' },
@@ -234,3 +224,4 @@ export default function CustomerDashboard() {
     </div>
   )
 }
+
