@@ -1,338 +1,185 @@
-import { useState, useEffect } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
-import { getMerchantBySlug } from '../../services/customerService';
-import { useAuth } from '../../context/AuthContext';
-import Logo from '../../components/ui/Logo';
-import { ArrowRight, Gift, Star, Loader2, Eye, EyeOff } from 'lucide-react';
+import { useState } from 'react'
+import { useParams, useNavigate } from 'react-router-dom'
+import { supabase } from '../../lib/supabase'
+import { ArrowRight, Loader2, User, Mail, Lock, Star } from 'lucide-react'
+import Logo from '../../components/ui/Logo'
 
 export default function JoinPage() {
-  const { slug } = useParams();
-  const navigate = useNavigate();
-  const { signUpCustomer, signIn, user, profile } = useAuth();
+  const { slug } = useParams()
+  const navigate = useNavigate()
+  const [mode, setMode] = useState('signup')
+  const [form, setForm] = useState({ fullName: '', email: '', password: '' })
+  const [loading, setLoading] = useState(false)
+  const [error, setError] = useState('')
+  const [merchantName, setMerchantName] = useState('')
+  const [merchantId, setMerchantId] = useState(null)
+  const [loaded, setLoaded] = useState(false)
 
-  const [merchant, setMerchant] = useState(null);
-  const [loadingMerchant, setLoadingMerchant] = useState(true);
-  const [mode, setMode] = useState('signup');
-  const [form, setForm] = useState({ fullName: '', email: '', password: '' });
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState(null);
-  const [showPassword, setShowPassword] = useState(false);
-
-  useEffect(() => {
-    const load = async () => {
-      try {
-        const data = await getMerchantBySlug(slug);
-        setMerchant(data || { business_name: 'Commerce partenaire', id: null });
-      } catch (e) {
-        setMerchant({ business_name: 'Commerce partenaire', id: null });
-      } finally {
-        setLoadingMerchant(false);
+  useState(() => {
+    const loadMerchant = async () => {
+      const { data } = await supabase
+        .from('merchants')
+        .select('id, business_name')
+        .eq('slug', slug)
+        .single()
+      if (data) {
+        setMerchantName(data.business_name)
+        setMerchantId(data.id)
       }
-    };
-    load();
-  }, [slug]);
-
-  useEffect(() => {
-    if (user && profile) {
-      if (profile.role === 'merchant') navigate('/dashboard');
-      else navigate('/client');
+      setLoaded(true)
     }
-  }, [user, profile]);
+    loadMerchant()
+  }, [slug])
 
-  const handle = (e) =>
-    setForm((f) => ({ ...f, [e.target.name]: e.target.value }));
+  const handle = e => setForm(f => ({ ...f, [e.target.name]: e.target.value }))
 
-  const submit = async (e) => {
-    e.preventDefault();
-    setError(null);
-    setLoading(true);
+  const submit = async () => {
+    setError('')
+    if (!form.email || !form.password) {
+      setError('Veuillez remplir tous les champs')
+      return
+    }
+    if (mode === 'signup' && !form.fullName) {
+      setError('Veuillez entrer votre prénom')
+      return
+    }
+    setLoading(true)
     try {
       if (mode === 'signup') {
-        await signUpCustomer({ ...form, merchantId: merchant?.id });
-      } else {
-        await signIn({ email: form.email, password: form.password });
-      }
-      navigate('/client');
-    } catch (err) {
-      setError(
-        mode === 'signup'
-          ? 'Erreur lors de la création du compte'
-          : 'Email ou mot de passe incorrect'
-      );
-    } finally {
-      setLoading(false);
-    }
-  };
+        const { data, error: authError } = await supabase.auth.signUp({
+          email: form.email,
+          password: form.password
+        })
+        if (authError) throw authError
 
-  if (loadingMerchant)
-    return (
-      <div
-        style={{
-          minHeight: '100vh',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-        }}
-      >
-        <div
-          style={{
-            width: 32,
-            height: 32,
-            border: '2px solid #fed7aa',
-            borderTopColor: '#f97316',
-            borderRadius: '50%',
-            animation: 'spin 1s linear infinite',
-          }}
-        />
-      </div>
-    );
+        const { data: signInData, error: signInError } = await supabase.auth.signInWithPassword({
+          email: form.email,
+          password: form.password
+        })
+        if (signInError) throw signInError
+
+        await supabase.from('profiles').insert({
+          id: signInData.user.id,
+          email: form.email,
+          role: 'customer',
+          full_name: form.fullName
+        })
+
+        if (merchantId) {
+          await supabase.from('customers').insert({
+            user_id: signInData.user.id,
+            merchant_id: merchantId,
+            points: 0
+          })
+        }
+      } else {
+        const { error: signInError } = await supabase.auth.signInWithPassword({
+          email: form.email,
+          password: form.password
+        })
+        if (signInError) throw signInError
+      }
+
+      navigate('/client')
+    } catch (e) {
+      setError(e?.message || 'Une erreur est survenue')
+    } finally {
+      setLoading(false)
+    }
+  }
 
   return (
-    <div
-      style={{
-        minHeight: '100vh',
-        background: 'linear-gradient(135deg,#fff7ed,white,#fffbeb)',
-        display: 'flex',
-        flexDirection: 'column',
-        alignItems: 'center',
-        justifyContent: 'center',
-        padding: 24,
-      }}
-    >
-      <div style={{ marginBottom: 32 }}>
-        <Logo size={32} />
-      </div>
-      <div style={{ width: '100%', maxWidth: 400 }}>
-        <div
-          style={{
-            background: 'linear-gradient(135deg,#f97316,#ea580c)',
-            borderRadius: 16,
-            padding: 24,
-            marginBottom: 16,
-            textAlign: 'center',
-            color: 'white',
-          }}
-        >
-          <div style={{ fontSize: 48, marginBottom: 12 }}>
-            {merchant?.business_name?.[0] || '🏪'}
+    <div style={{minHeight:'100vh',background:'linear-gradient(135deg,#fff7ed,#fafaf9)',display:'flex',alignItems:'center',justifyContent:'center',padding:24}}>
+      <div style={{width:'100%',maxWidth:400}}>
+
+        {/* HEADER */}
+        <div style={{textAlign:'center',marginBottom:32}}>
+          <div style={{display:'flex',justifyContent:'center',marginBottom:16}}>
+            <Logo />
           </div>
-          <h1 style={{ fontSize: 18, fontWeight: 800, marginBottom: 4 }}>
-            {merchant?.business_name}
+          {merchantName && (
+            <div style={{display:'inline-flex',alignItems:'center',gap:8,padding:'8px 16px',background:'white',border:'1px solid #fed7aa',borderRadius:99,marginBottom:16,boxShadow:'0 2px 8px rgba(0,0,0,0.06)'}}>
+              <Star style={{width:14,height:14,color:'#f97316',fill:'#f97316'}} />
+              <span style={{fontSize:14,fontWeight:600,color:'#1c1917'}}>{merchantName}</span>
+            </div>
+          )}
+          <h1 style={{fontSize:22,fontWeight:800,color:'#1c1917',marginBottom:8}}>
+            {mode === 'signup' ? 'Rejoindre le programme' : 'Se connecter'}
           </h1>
-          <p style={{ color: '#fed7aa', fontSize: 14 }}>
-            Rejoignez le programme de fidélité !
+          <p style={{color:'#78716c',fontSize:14}}>
+            {mode === 'signup'
+              ? 'Créez votre compte pour gagner des points à chaque visite'
+              : 'Connectez-vous pour voir vos points'
+            }
           </p>
-          <div
-            style={{
-              display: 'flex',
-              justifyContent: 'center',
-              gap: 24,
-              marginTop: 16,
-            }}
-          >
-            {[
-              { icon: Star, text: 'Gagnez des points' },
-              { icon: Gift, text: 'Débloquez des cadeaux' },
-            ].map((b, i) => (
-              <div
-                key={i}
-                style={{
-                  display: 'flex',
-                  flexDirection: 'column',
-                  alignItems: 'center',
-                  gap: 4,
-                  color: '#fed7aa',
-                }}
-              >
-                <div
-                  style={{
-                    width: 32,
-                    height: 32,
-                    background: 'rgba(255,255,255,0.2)',
-                    borderRadius: 8,
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                  }}
-                >
-                  <b.icon style={{ width: 16, height: 16, color: 'white' }} />
-                </div>
-                <span style={{ fontSize: 11 }}>{b.text}</span>
-              </div>
-            ))}
-          </div>
         </div>
-        <div
-          style={{
-            background: 'white',
-            borderRadius: 16,
-            border: '1px solid #f5f5f4',
-            padding: 24,
-          }}
-        >
-          <div
-            style={{
-              display: 'flex',
-              background: '#f5f5f4',
-              borderRadius: 12,
-              padding: 4,
-              marginBottom: 20,
-            }}
-          >
-            {['signup', 'login'].map((m) => (
-              <button
-                key={m}
-                onClick={() => setMode(m)}
-                style={{
-                  flex: 1,
-                  padding: '8px',
-                  borderRadius: 8,
-                  fontSize: 14,
-                  fontWeight: 500,
-                  border: 'none',
-                  cursor: 'pointer',
-                  transition: 'all 0.2s',
-                  background: mode === m ? 'white' : 'transparent',
-                  color: mode === m ? '#1c1917' : '#78716c',
-                }}
-              >
-                {m === 'signup' ? 'Créer un compte' : 'Se connecter'}
+
+        {/* CARD */}
+        <div style={{background:'white',borderRadius:20,padding:28,border:'1px solid #f5f5f4',boxShadow:'0 4px 24px -8px rgba(0,0,0,0.08)'}}>
+
+          {/* TOGGLE */}
+          <div style={{display:'flex',background:'#fafaf9',borderRadius:12,padding:4,marginBottom:24}}>
+            {['signup','login'].map(m => (
+              <button key={m} onClick={() => { setMode(m); setError('') }}
+                style={{flex:1,padding:'8px',borderRadius:10,border:'none',fontWeight:600,fontSize:13,cursor:'pointer',background:mode===m?'white':'transparent',color:mode===m?'#1c1917':'#78716c',boxShadow:mode===m?'0 1px 4px rgba(0,0,0,0.1)':'none',transition:'all 0.2s'}}>
+                {m === 'signup' ? "S'inscrire" : 'Se connecter'}
               </button>
             ))}
           </div>
+
           {error && (
-            <div
-              style={{
-                marginBottom: 16,
-                padding: '12px 16px',
-                background: '#fef2f2',
-                border: '1px solid #fecaca',
-                borderRadius: 12,
-                color: '#dc2626',
-                fontSize: 14,
-              }}
-            >
-              {error}
+            <div style={{background:'#fff1f2',border:'1px solid #fecdd3',borderRadius:10,padding:12,marginBottom:16,color:'#e11d48',fontSize:13}}>
+              ⚠️ {error}
             </div>
           )}
-          <form onSubmit={submit}>
+
+          <div style={{display:'flex',flexDirection:'column',gap:14}}>
             {mode === 'signup' && (
-              <div style={{ marginBottom: 12 }}>
-                <label
-                  style={{
-                    display: 'block',
-                    fontSize: 14,
-                    fontWeight: 500,
-                    color: '#44403c',
-                    marginBottom: 6,
-                  }}
-                >
-                  Prénom et nom
-                </label>
-                <input
-                  name="fullName"
-                  value={form.fullName}
-                  onChange={handle}
-                  placeholder="Marie Dupont"
-                  required
-                  className="input-base"
-                />
+              <div>
+                <label style={{display:'block',fontSize:13,fontWeight:500,color:'#44403c',marginBottom:6}}>Votre prénom</label>
+                <div style={{position:'relative'}}>
+                  <User style={{position:'absolute',left:12,top:'50%',transform:'translateY(-50%)',width:16,height:16,color:'#a8a29e'}} />
+                  <input name="fullName" value={form.fullName} onChange={handle}
+                    placeholder="Marie" className="input-base" style={{paddingLeft:40}} />
+                </div>
               </div>
             )}
-            <div style={{ marginBottom: 12 }}>
-              <label
-                style={{
-                  display: 'block',
-                  fontSize: 14,
-                  fontWeight: 500,
-                  color: '#44403c',
-                  marginBottom: 6,
-                }}
-              >
-                Email
-              </label>
-              <input
-                name="email"
-                type="email"
-                value={form.email}
-                onChange={handle}
-                placeholder="marie@exemple.fr"
-                required
-                className="input-base"
-              />
-            </div>
-            <div style={{ marginBottom: 20 }}>
-              <label
-                style={{
-                  display: 'block',
-                  fontSize: 14,
-                  fontWeight: 500,
-                  color: '#44403c',
-                  marginBottom: 6,
-                }}
-              >
-                Mot de passe
-              </label>
-              <div style={{ position: 'relative' }}>
-                <input
-                  name="password"
-                  type={showPassword ? 'text' : 'password'}
-                  value={form.password}
-                  onChange={handle}
-                  placeholder="••••••••"
-                  minLength={6}
-                  required
-                  className="input-base"
-                  style={{ paddingRight: 40 }}
-                />
-                <button
-                  type="button"
-                  onClick={() => setShowPassword(!showPassword)}
-                  style={{
-                    position: 'absolute',
-                    right: 12,
-                    top: '50%',
-                    transform: 'translateY(-50%)',
-                    background: 'none',
-                    border: 'none',
-                    cursor: 'pointer',
-                    color: '#a8a29e',
-                  }}
-                >
-                  {showPassword ? (
-                    <EyeOff style={{ width: 16, height: 16 }} />
-                  ) : (
-                    <Eye style={{ width: 16, height: 16 }} />
-                  )}
-                </button>
+
+            <div>
+              <label style={{display:'block',fontSize:13,fontWeight:500,color:'#44403c',marginBottom:6}}>Email</label>
+              <div style={{position:'relative'}}>
+                <Mail style={{position:'absolute',left:12,top:'50%',transform:'translateY(-50%)',width:16,height:16,color:'#a8a29e'}} />
+                <input name="email" type="email" value={form.email} onChange={handle}
+                  placeholder="marie@exemple.fr" className="input-base" style={{paddingLeft:40}} />
               </div>
             </div>
-            <button
-              type="submit"
-              disabled={loading}
-              className="btn-primary"
-              style={{ width: '100%', justifyContent: 'center', padding: 14 }}
-            >
-              {loading ? (
-                <Loader2
-                  style={{
-                    width: 16,
-                    height: 16,
-                    animation: 'spin 1s linear infinite',
-                  }}
-                />
-              ) : (
-                <>
-                  {mode === 'signup'
-                    ? 'Rejoindre le programme'
-                    : 'Se connecter'}{' '}
-                  <ArrowRight style={{ width: 16, height: 16 }} />
-                </>
-              )}
+
+            <div>
+              <label style={{display:'block',fontSize:13,fontWeight:500,color:'#44403c',marginBottom:6}}>Mot de passe</label>
+              <div style={{position:'relative'}}>
+                <Lock style={{position:'absolute',left:12,top:'50%',transform:'translateY(-50%)',width:16,height:16,color:'#a8a29e'}} />
+                <input name="password" type="password" value={form.password} onChange={handle}
+                  placeholder="6 caractères minimum" className="input-base" style={{paddingLeft:40}} />
+              </div>
+            </div>
+
+            <button onClick={submit} disabled={loading}
+              style={{display:'flex',alignItems:'center',justifyContent:'center',gap:8,width:'100%',padding:'14px',background:'linear-gradient(135deg,#f97316,#ea580c)',color:'white',fontWeight:700,fontSize:15,borderRadius:12,border:'none',cursor:loading?'not-allowed':'pointer',opacity:loading?0.7:1,marginTop:4}}>
+              {loading
+                ? <Loader2 style={{width:18,height:18,animation:'spin 1s linear infinite'}} />
+                : <><ArrowRight style={{width:16,height:16}} /> {mode === 'signup' ? "Rejoindre le programme" : "Se connecter"}</>
+              }
             </button>
-          </form>
+          </div>
+
         </div>
+
+        {/* FOOTER */}
+        <p style={{textAlign:'center',fontSize:12,color:'#a8a29e',marginTop:16}}>
+          Programme de fidélité propulsé par Loyalty Loop
+        </p>
+
       </div>
     </div>
-  );
+  )
 }
