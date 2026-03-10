@@ -18,14 +18,22 @@ export default function Signup() {
       setError('Veuillez remplir tous les champs')
       return
     }
+    if (form.password.length < 6) {
+      setError('Le mot de passe doit faire au moins 6 caractères')
+      return
+    }
     setLoading(true)
     setError('')
     try {
-      await signUpMerchant(form)
+      const { data, error: signUpError } = await signUpMerchant(form)
+      if (signUpError) {
+        setError(signUpError.message || 'Erreur lors de la création du compte')
+        setLoading(false)
+        return
+      }
       navigate('/onboarding')
     } catch (e) {
-      setError(e.message || 'Une erreur est survenue')
-    } finally {
+      setError(e?.message || 'Une erreur est survenue, réessayez')
       setLoading(false)
     }
   }
@@ -44,7 +52,7 @@ export default function Signup() {
         <div style={{background:'white',borderRadius:20,padding:32,border:'1px solid #f5f5f4',boxShadow:'0 4px 24px -8px rgba(0,0,0,0.08)'}}>
           {error && (
             <div style={{background:'#fff1f2',border:'1px solid #fecdd3',borderRadius:10,padding:12,marginBottom:20,color:'#e11d48',fontSize:14}}>
-              {error}
+              ⚠️ {error}
             </div>
           )}
 
@@ -81,7 +89,7 @@ export default function Signup() {
               <div style={{position:'relative'}}>
                 <Lock style={{position:'absolute',left:12,top:'50%',transform:'translateY(-50%)',width:16,height:16,color:'#a8a29e'}} />
                 <input name="password" type="password" value={form.password} onChange={handle}
-                  placeholder="8 caractères minimum" className="input-base" style={{paddingLeft:40}} />
+                  placeholder="6 caractères minimum" className="input-base" style={{paddingLeft:40}} />
               </div>
             </div>
 
