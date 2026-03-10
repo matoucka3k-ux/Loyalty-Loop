@@ -19,7 +19,7 @@ export default function Landing() {
   ]
 
   const testimonials = [
-    { name: 'Boulangerie Martin', text: "Mes clients reviennent beaucoup plus souvent depuis que j'utilise Loyalty Loop. Mon CA a augmenté de 20%.", avatar: '🥐' },
+    { name: 'Boulangerie Martin', text: "Mes clients reviennent beaucoup plus souvent depuis que j'utilise Stamply. Mon CA a augmenté de 20%.", avatar: '🥐' },
     { name: 'Café Central', text: "Simple et efficace. En 10 minutes j'avais mon programme de fidélité en place et mes premiers clients inscrits.", avatar: '☕' },
     { name: 'Barber Shop Elite', text: "Le meilleur outil fidélité que j'ai testé. L'interface est claire et mes clients adorent le système de points.", avatar: '✂️' },
   ]
@@ -44,7 +44,6 @@ export default function Landing() {
   return (
     <div style={{minHeight:'100vh',background:'white'}}>
 
-      {/* NAVBAR */}
       <nav style={{position:'fixed',top:0,left:0,right:0,zIndex:50,display:'flex',alignItems:'center',justifyContent:'space-between',padding:'16px 24px',background:'rgba(255,255,255,0.85)',backdropFilter:'blur(12px)',borderBottom:'1px solid #f5f5f4'}}>
         <Logo />
         <div style={{display:'flex',alignItems:'center',gap:12}}>
@@ -53,7 +52,6 @@ export default function Landing() {
         </div>
       </nav>
 
-      {/* HERO */}
       <section style={{position:'relative',overflow:'hidden',paddingTop:128,paddingBottom:96,paddingLeft:24,paddingRight:24}}>
         <div className="blob" style={{width:384,height:384,background:'#fb923c',top:0,right:0,transform:'translate(50%,-25%)'}} />
         <div className="blob" style={{width:288,height:288,background:'#fcd34d',bottom:0,left:0,transform:'translate(-33%,0)'}} />
@@ -63,7 +61,7 @@ export default function Landing() {
             Nouveau · Fidélisation simplifiée
           </div>
           <h1 style={{fontSize:'clamp(48px,8vw,80px)',fontWeight:800,color:'#1c1917',lineHeight:1.05,letterSpacing:'-0.02em',marginBottom:24}}>
-            <span className="gradient-text">Loyalty Loop</span>
+            <span className="gradient-text">Stamply</span>
           </h1>
           <p style={{fontSize:'clamp(20px,3vw,28px)',fontWeight:600,color:'#44403c',marginBottom:16}}>
             Il n'a jamais été aussi facile de
@@ -88,7 +86,6 @@ export default function Landing() {
         </div>
       </section>
 
-      {/* FEATURES */}
       <section style={{padding:'96px 24px',background:'#fafaf9'}}>
         <div style={{maxWidth:960,margin:'0 auto'}}>
           <div style={{textAlign:'center',marginBottom:64}}>
@@ -109,7 +106,6 @@ export default function Landing() {
         </div>
       </section>
 
-      {/* COMMENT CA MARCHE */}
       <section style={{padding:'96px 24px'}}>
         <div style={{maxWidth:960,margin:'0 auto'}}>
           <div style={{textAlign:'center',marginBottom:64}}>
@@ -137,7 +133,6 @@ export default function Landing() {
         </div>
       </section>
 
-      {/* PRICING */}
       <section style={{padding:'96px 24px',background:'#fafaf9'}}>
         <div style={{maxWidth:768,margin:'0 auto'}}>
           <div style={{textAlign:'center',marginBottom:64}}>
@@ -174,11 +169,10 @@ export default function Landing() {
         </div>
       </section>
 
-      {/* TESTIMONIALS */}
       <section style={{padding:'96px 24px'}}>
         <div style={{maxWidth:960,margin:'0 auto'}}>
           <div style={{textAlign:'center',marginBottom:64}}>
-            <h2 style={{fontSize:36,fontWeight:800,color:'#1c1917',marginBottom:16}}>Ils fidélisent avec Loyalty Loop</h2>
+            <h2 style={{fontSize:36,fontWeight:800,color:'#1c1917',marginBottom:16}}>Ils fidélisent avec Stamply</h2>
           </div>
           <div style={{display:'grid',gridTemplateColumns:'repeat(auto-fit,minmax(260px,1fr))',gap:24}}>
             {testimonials.map((t,i) => (
@@ -195,7 +189,6 @@ export default function Landing() {
         </div>
       </section>
 
-      {/* CTA */}
       <section style={{padding:'96px 24px',background:'#fafaf9'}}>
         <div style={{maxWidth:640,margin:'0 auto',textAlign:'center'}}>
           <div style={{background:'linear-gradient(135deg,#f97316,#ea580c)',borderRadius:24,padding:64,position:'relative',overflow:'hidden'}}>
@@ -209,14 +202,17 @@ export default function Landing() {
         </div>
       </section>
 
-      {/* FOOTER */}
       <footer style={{borderTop:'1px solid #f5f5f4',padding:'32px 24px'}}>
         <div style={{maxWidth:960,margin:'0 auto',display:'flex',flexWrap:'wrap',alignItems:'center',justifyContent:'space-between',gap:16}}>
           <Logo />
-          <p style={{fontSize:14,color:'#a8a29e'}}>© 2024 Loyalty Loop. Tous droits réservés.</p>
+          <div style={{display:'flex',gap:24,alignItems:'center'}}>
+            <button onClick={() => navigate('/legal')} style={{background:'none',border:'none',color:'#a8a29e',fontSize:13,cursor:'pointer'}}>Mentions légales</button>
+            <p style={{fontSize:14,color:'#a8a29e'}}>© 2025 Stamply — Mathis Bobo & Florian Buisson</p>
+          </div>
         </div>
       </footer>
 
     </div>
   )
 }
+
