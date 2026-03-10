@@ -6,6 +6,7 @@ import Login from './pages/Login'
 import Signup from './pages/Signup'
 import Pricing from './pages/Pricing'
 import Onboarding from './pages/dashboard/Onboarding'
+import Legal from './pages/Legal'
 import JoinPage from './pages/client/JoinPage'
 import CustomerDashboard from './pages/client/CustomerDashboard'
 import MerchantDashboard from './pages/dashboard/MerchantDashboard'
@@ -25,6 +26,7 @@ function AppRoutes() {
       <Route path="/login" element={<Login />} />
       <Route path="/signup" element={<Signup />} />
       <Route path="/pricing" element={<Pricing />} />
+      <Route path="/legal" element={<Legal />} />
       <Route path="/onboarding" element={<Onboarding />} />
       <Route path="/join/:slug" element={<JoinPage />} />
       <Route path="/dashboard" element={
