@@ -27,9 +27,7 @@ export function AuthProvider({ children }) {
           setMerchant(merchantData)
         }
       }
-    } catch (error) {
-      console.error('Error loading profile:', error)
-    }
+    } catch (error) {}
   }
 
   useEffect(() => {
