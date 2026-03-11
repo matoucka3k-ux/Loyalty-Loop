@@ -1,6 +1,3 @@
-Le fichier `Onboarding.jsx` a été coupé à la ligne 148. Voici le fichier complet :
-
-```jsx
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useAuth } from '../../context/AuthContext'
@@ -77,17 +74,17 @@ export default function Onboarding() {
             </p>
             <div style={{display:'flex',flexDirection:'column',gap:12,marginBottom:32}}>
               {[
-                { icon:'⚙️', text:'Choisir votre systeme de points' },
-                { icon:'📲', text:'Obtenir votre QR code' },
-                { icon:'🚀', text:'Acceder a votre dashboard' },
-              ].map((item,i) => (
+                {icon:'⚙️', text:'Choisir votre systeme de points'},
+                {icon:'📲', text:'Obtenir votre QR code'},
+                {icon:'🚀', text:'Acceder a votre dashboard'},
+              ].map((item, i) => (
                 <div key={i} style={{display:'flex',alignItems:'center',gap:12,padding:'12px 16px',background:'#f8faff',borderRadius:12}}>
                   <span style={{fontSize:20}}>{item.icon}</span>
                   <span style={{fontSize:14,color:'#44403c',fontWeight:500}}>{item.text}</span>
                 </div>
               ))}
             </div>
-            <button onClick={() => setStep(2)} style={{width:'100%',display:'flex',alignItems:'center',justifyContent:'center',gap:8,padding:'14px',background:'linear-gradient(135deg,#1e40af,#3b82f6)',color:'white',fontWeight:700,fontSize:16,borderRadius:12,border:'none',cursor:'pointer'}}>
+            <button onClick={() => setStep(2)} style={{width:'100%',display:'flex',alignItems:'center',justifyContent:'center',gap:8,padding:'14px',background:'linear-gradient(135deg,#1e40af,#3b82f6)',color:'white',fontWeight:700,fontSize:16,borderRadius:12,border:'none',cursor:'pointer',boxShadow:'0 8px 24px -8px rgba(30,64,175,0.5)'}}>
               Commencer <ArrowRight style={{width:16,height:16}} />
             </button>
           </div>
@@ -109,7 +106,7 @@ export default function Onboarding() {
                   <Euro style={{width:22,height:22,color:loyaltyMode==='euro'?'#1e40af':'#a8a29e'}} />
                 </div>
                 <p style={{fontWeight:700,color:loyaltyMode==='euro'?'#1e40af':'#1e3a5f',fontSize:14,marginBottom:4}}>Par euro</p>
-                <p style={{fontSize:12,color:'#78716c'}}>Ex: 1 euro = 2 pts</p>
+                <p style={{fontSize:12,color:'#78716c'}}>Ex: 1 = 2 pts</p>
               </button>
               <button onClick={() => setLoyaltyMode('products')}
                 style={{padding:'20px 16px',borderRadius:16,border:loyaltyMode==='products'?'2px solid #3b82f6':'2px solid #dbeafe',background:loyaltyMode==='products'?'#eff6ff':'#f8faff',cursor:'pointer',textAlign:'center',transition:'all 0.2s'}}>
@@ -134,7 +131,7 @@ export default function Onboarding() {
                 </div>
                 <div style={{background:'#eff6ff',border:'1px solid #bfdbfe',borderRadius:12,padding:14,textAlign:'center'}}>
                   <p style={{fontSize:14,color:'#1e3a5f'}}>
-                    Pour <strong>10 euros</strong> depenses le client gagne <strong style={{color:'#1e40af'}}>{pointsPerEuro * 10} points</strong>
+                    Pour <strong>10</strong> depenses, le client gagne <strong style={{color:'#1e40af'}}>{pointsPerEuro * 10} points</strong>
                   </p>
                 </div>
               </div>
@@ -144,7 +141,7 @@ export default function Onboarding() {
               <div>
                 <p style={{fontWeight:600,color:'#1e3a5f',fontSize:14,marginBottom:12}}>Vos produits et leurs points</p>
                 <div style={{display:'flex',flexDirection:'column',gap:8,marginBottom:16,maxHeight:200,overflowY:'auto'}}>
-                  {products.map((p,i) => (
+                  {products.map((p, i) => (
                     <div key={i} style={{display:'flex',alignItems:'center',gap:12,padding:'12px 14px',background:'#f8faff',borderRadius:12,border:'1px solid #dbeafe'}}>
                       <span style={{fontSize:16}}>🥐</span>
                       <span style={{flex:1,fontWeight:500,color:'#1e3a5f',fontSize:14}}>{p.name}</span>
@@ -206,14 +203,14 @@ export default function Onboarding() {
                   {window.location.origin}/join/{merchant?.slug}
                 </span>
               </div>
-              <p style={{fontSize:12,color:'#a8a29e'}}>Retrouvez votre QR code dans le dashboard</p>
+              <p style={{fontSize:12,color:'#a8a29e'}}>Retrouvez votre QR code dans le dashboard, onglet QR Code</p>
             </div>
             <div style={{display:'flex',flexDirection:'column',gap:12,marginBottom:32}}>
               {[
                 { text: loyaltyMode === 'euro' ? pointsPerEuro + ' point' + (pointsPerEuro > 1 ? 's' : '') + ' par euro configure' : products.length + ' produits configures' },
                 { text: 'QR code pret a afficher' },
                 { text: 'Programme actif immediatement' },
-              ].map((item,i) => (
+              ].map((item, i) => (
                 <div key={i} style={{display:'flex',alignItems:'center',gap:12,padding:'10px 16px',background:'#f0fdf4',borderRadius:10}}>
                   <span>✅</span>
                   <span style={{fontSize:14,color:'#166534',fontWeight:500}}>{item.text}</span>
@@ -221,16 +218,4 @@ export default function Onboarding() {
               ))}
             </div>
             <button onClick={() => navigate('/dashboard')}
-              style={{width:'100%',display:'flex',alignItems:'center',justifyContent:'center',gap:8,padding:'14px',background:'linear-gradient(135deg,#1e40af,#3b82f6)',color:'white',fontWeight:700,fontSize:16,borderRadius:12,border:'none',cursor:'pointer'}}>
-              <Sparkles style={{width:16,height:16}} /> Acceder a mon dashboard
-            </button>
-          </div>
-        )}
-
-      </div>
-    </div>
-  )
-}
-```
-
-Commit et dis-moi ! 🚀
+              style={{width:'100%',display:'flex',alignItems:'center',justifyContent:'center',gap:8,padding:'14px',background:'linear-gradient(135deg,#1e40af,#3b82f6)',color:'white',fontW
