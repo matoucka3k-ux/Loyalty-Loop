@@ -1,8 +1,9 @@
 import { useState, useEffect } from 'react'
 import { useAuth } from '../../context/AuthContext'
 import { supabase } from '../../lib/supabase'
-import { LogOut, ChevronRight } from 'lucide-react'
+import { LogOut, ChevronRight, QrCode } from 'lucide-react'
 import Logo from '../../components/ui/Logo'
+import { QRCodeSVG } from 'qrcode.react'
 
 export default function CustomerDashboard() {
   const { user, profile, signOut } = useAuth()
@@ -49,6 +50,7 @@ export default function CustomerDashboard() {
 
       <div style={{padding:'0 16px',marginTop:-24}}>
 
+        {/* HOME */}
         {tab === 'home' && (
           <div>
             <div style={{background:'white',borderRadius:20,padding:24,marginBottom:16,boxShadow:'0 4px 20px -8px rgba(30,64,175,0.1)'}}>
@@ -77,6 +79,20 @@ export default function CustomerDashboard() {
                 </div>
               )}
             </div>
+
+            {/* BOUTON RAPIDE QR */}
+            <button onClick={() => setTab('myqr')} style={{width:'100%',display:'flex',alignItems:'center',justifyContent:'space-between',padding:'16px 20px',background:'linear-gradient(135deg,#1e40af,#3b82f6)',borderRadius:16,border:'none',cursor:'pointer',marginBottom:16,boxShadow:'0 4px 20px -8px rgba(30,64,175,0.3)'}}>
+              <div style={{display:'flex',alignItems:'center',gap:12}}>
+                <div style={{width:40,height:40,background:'rgba(255,255,255,0.2)',borderRadius:10,display:'flex',alignItems:'center',justifyContent:'center'}}>
+                  <QrCode style={{width:20,height:20,color:'white'}} />
+                </div>
+                <div style={{textAlign:'left'}}>
+                  <p style={{color:'white',fontWeight:700,fontSize:14}}>Mon QR code fidélité</p>
+                  <p style={{color:'#bfdbfe',fontSize:12}}>À présenter au boulanger</p>
+                </div>
+              </div>
+              <ChevronRight style={{width:18,height:18,color:'#bfdbfe'}} />
+            </button>
 
             {rewards.length > 0 && (
               <div style={{background:'white',borderRadius:20,padding:24,marginBottom:16,boxShadow:'0 4px 20px -8px rgba(30,64,175,0.1)'}}>
@@ -115,6 +131,34 @@ export default function CustomerDashboard() {
           </div>
         )}
 
+        {/* MON QR CODE */}
+        {tab === 'myqr' && (
+          <div>
+            <h2 style={{fontSize:18,fontWeight:800,color:'#1e3a5f',margin:'24px 0 16px'}}>Mon QR code</h2>
+            <div style={{background:'white',borderRadius:20,padding:32,textAlign:'center',boxShadow:'0 4px 20px -8px rgba(30,64,175,0.1)',marginBottom:16}}>
+              <p style={{fontSize:14,color:'#78716c',marginBottom:24}}>Présentez ce QR code à votre boulanger pour qu'il puisse vous attribuer des points.</p>
+              <div style={{display:'inline-block',padding:24,background:'white',borderRadius:16,border:'2px solid #dbeafe',marginBottom:24}}>
+                <QRCodeSVG
+                  value={JSON.stringify({ customerId: customerData?.id, userId: user?.id })}
+                  size={200}
+                  fgColor="#1e40af"
+                  bgColor="white"
+                />
+              </div>
+              <p style={{fontWeight:700,color:'#1e3a5f',fontSize:16,marginBottom:4}}>{profile?.full_name}</p>
+              <div style={{display:'inline-flex',alignItems:'center',gap:8,padding:'8px 16px',background:'#eff6ff',borderRadius:99,marginTop:8}}>
+                <span style={{fontWeight:800,color:'#1e40af',fontSize:18}}>{points}</span>
+                <span style={{fontSize:13,color:'#3b82f6'}}>points</span>
+              </div>
+            </div>
+            <div style={{background:'#eff6ff',borderRadius:16,padding:20,border:'1px solid #bfdbfe'}}>
+              <p style={{fontWeight:600,color:'#1e3a5f',fontSize:14,marginBottom:8}}>💡 Comment ça marche ?</p>
+              <p style={{fontSize:13,color:'#1e3a5f',lineHeight:1.6}}>À chaque visite, montrez ce QR code au comptoir. Le boulanger le scanne, sélectionne vos achats et vos points sont crédités automatiquement.</p>
+            </div>
+          </div>
+        )}
+
+        {/* REWARDS */}
         {tab === 'rewards' && (
           <div>
             <h2 style={{fontSize:18,fontWeight:800,color:'#1e3a5f',margin:'24px 0 16px'}}>Récompenses</h2>
@@ -161,6 +205,7 @@ export default function CustomerDashboard() {
           </div>
         )}
 
+        {/* HISTORY */}
         {tab === 'history' && (
           <div>
             <h2 style={{fontSize:18,fontWeight:800,color:'#1e3a5f',margin:'24px 0 16px'}}>Historique</h2>
@@ -192,12 +237,13 @@ export default function CustomerDashboard() {
             )}
           </div>
         )}
-
       </div>
 
+      {/* BOTTOM NAV */}
       <div style={{position:'fixed',bottom:0,left:'50%',transform:'translateX(-50%)',width:'100%',maxWidth:480,background:'white',borderTop:'1px solid #dbeafe',display:'flex',padding:'8px 0'}}>
         {[
           { id:'home', icon:'🏠', label:'Accueil' },
+          { id:'myqr', icon:'📱', label:'Mon QR' },
           { id:'rewards', icon:'🥐', label:'Récompenses' },
           { id:'history', icon:'📋', label:'Historique' },
         ].map(t => (
@@ -208,8 +254,8 @@ export default function CustomerDashboard() {
           </button>
         ))}
       </div>
-
     </div>
   )
 }
+
 
