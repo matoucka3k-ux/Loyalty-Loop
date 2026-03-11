@@ -1,20 +1,38 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useAuth } from '../../context/AuthContext'
-import { Check, ArrowRight, QrCode, Star, Sparkles, Loader2 } from 'lucide-react'
+import { Check, ArrowRight, QrCode, Star, Sparkles, Loader2, Euro, ShoppingBag, Plus, Trash2 } from 'lucide-react'
 import { supabase } from '../../lib/supabase'
 
 export default function Onboarding() {
   const { merchant, profile, refreshMerchant } = useAuth()
   const navigate = useNavigate()
   const [step, setStep] = useState(1)
+  const [loyaltyMode, setLoyaltyMode] = useState('euro')
   const [pointsPerEuro, setPointsPerEuro] = useState(1)
+  const [products, setProducts] = useState([
+    { name: 'Baguette', points: 2 },
+    { name: 'Croissant', points: 3 },
+  ])
+  const [newProduct, setNewProduct] = useState({ name: '', points: '' })
   const [saving, setSaving] = useState(false)
 
-  const savePoints = async () => {
+  const addProduct = () => {
+    if (!newProduct.name || !newProduct.points) return
+    setProducts(p => [...p, { name: newProduct.name, points: Number(newProduct.points) }])
+    setNewProduct({ name: '', points: '' })
+  }
+
+  const removeProduct = (i) => setProducts(p => p.filter((_, idx) => idx !== i))
+
+  const saveConfig = async () => {
     setSaving(true)
     try {
-      await supabase.from('merchants').update({ points_per_euro: pointsPerEuro }).eq('id', merchant?.id)
+      await supabase.from('merchants').update({
+        loyalty_mode: loyaltyMode,
+        points_per_euro: loyaltyMode === 'euro' ? pointsPerEuro : null,
+        products: loyaltyMode === 'products' ? products : [],
+      }).eq('id', merchant?.id)
       await refreshMerchant()
       setStep(3)
     } catch (e) { setStep(3) }
@@ -23,7 +41,9 @@ export default function Onboarding() {
 
   return (
     <div style={{minHeight:'100vh',background:'linear-gradient(135deg,#eff6ff,#f8faff)',display:'flex',alignItems:'center',justifyContent:'center',padding:24}}>
-      <div style={{maxWidth:520,width:'100%'}}>
+      <div style={{maxWidth:560,width:'100%'}}>
+
+        {/* PROGRESS */}
         <div style={{display:'flex',alignItems:'center',gap:8,marginBottom:40,justifyContent:'center'}}>
           {[1,2,3].map((s,i) => (
             <div key={s} style={{display:'flex',alignItems:'center',gap:8}}>
@@ -35,6 +55,7 @@ export default function Onboarding() {
           ))}
         </div>
 
+        {/* STEP 1 — Bienvenue */}
         {step === 1 && (
           <div style={{background:'white',borderRadius:24,padding:40,border:'1px solid #dbeafe',boxShadow:'0 20px 60px -20px rgba(30,64,175,0.15)',textAlign:'center'}}>
             <div style={{fontSize:64,marginBottom:16}}>🥐</div>
@@ -42,7 +63,11 @@ export default function Onboarding() {
             <p style={{color:'#78716c',fontSize:16,marginBottom:8}}><strong style={{color:'#1e40af'}}>{merchant?.business_name}</strong> est maintenant sur FideliPain.</p>
             <p style={{color:'#a8a29e',fontSize:14,marginBottom:32}}>Configurons votre programme de fidélité en 2 minutes.</p>
             <div style={{display:'flex',flexDirection:'column',gap:12,marginBottom:32}}>
-              {[{icon:'⭐',text:'Définir vos points par achat'},{icon:'📲',text:'Obtenir votre QR code'},{icon:'🚀',text:'Accéder à votre dashboard'}].map((item,i) => (
+              {[
+                {icon:'⚙️', text:'Choisir votre système de points'},
+                {icon:'📲', text:'Obtenir votre QR code'},
+                {icon:'🚀', text:'Accéder à votre dashboard'},
+              ].map((item,i) => (
                 <div key={i} style={{display:'flex',alignItems:'center',gap:12,padding:'12px 16px',background:'#f8faff',borderRadius:12}}>
                   <span style={{fontSize:20}}>{item.icon}</span>
                   <span style={{fontSize:14,color:'#44403c',fontWeight:500}}>{item.text}</span>
@@ -55,34 +80,92 @@ export default function Onboarding() {
           </div>
         )}
 
+        {/* STEP 2 — Configuration */}
         {step === 2 && (
           <div style={{background:'white',borderRadius:24,padding:40,border:'1px solid #dbeafe',boxShadow:'0 20px 60px -20px rgba(30,64,175,0.15)'}}>
             <div style={{textAlign:'center',marginBottom:32}}>
-              <div style={{width:64,height:64,borderRadius:'50%',background:'#eff6ff',display:'flex',alignItems:'center',justifyContent:'center',margin:'0 auto 16px'}}>
-                <Star style={{width:28,height:28,color:'#3b82f6'}} />
+              <h2 style={{fontSize:22,fontWeight:800,color:'#1e3a5f',marginBottom:8}}>Choisissez votre système de points</h2>
+              <p style={{color:'#78716c',fontSize:14}}>Vous pourrez modifier ce choix plus tard.</p>
+            </div>
+
+            {/* MODE SELECTOR */}
+            <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:12,marginBottom:28}}>
+              <button onClick={() => setLoyaltyMode('euro')}
+                style={{padding:'20px 16px',borderRadius:16,border:loyaltyMode==='euro'?'2px solid #3b82f6':'2px solid #dbeafe',background:loyaltyMode==='euro'?'#eff6ff':'#f8faff',cursor:'pointer',textAlign:'center',transition:'all 0.2s'}}>
+                <div style={{width:44,height:44,borderRadius:12,background:loyaltyMode==='euro'?'#dbeafe':'#e7e5e4',display:'flex',alignItems:'center',justifyContent:'center',margin:'0 auto 10px'}}>
+                  <Euro style={{width:22,height:22,color:loyaltyMode==='euro'?'#1e40af':'#a8a29e'}} />
+                </div>
+                <p style={{fontWeight:700,color:loyaltyMode==='euro'?'#1e40af':'#1e3a5f',fontSize:14,marginBottom:4}}>Par euro</p>
+                <p style={{fontSize:12,color:'#78716c'}}>Ex: 1€ = 2 pts</p>
+              </button>
+              <button onClick={() => setLoyaltyMode('products')}
+                style={{padding:'20px 16px',borderRadius:16,border:loyaltyMode==='products'?'2px solid #3b82f6':'2px solid #dbeafe',background:loyaltyMode==='products'?'#eff6ff':'#f8faff',cursor:'pointer',textAlign:'center',transition:'all 0.2s'}}>
+                <div style={{width:44,height:44,borderRadius:12,background:loyaltyMode==='products'?'#dbeafe':'#e7e5e4',display:'flex',alignItems:'center',justifyContent:'center',margin:'0 auto 10px'}}>
+                  <ShoppingBag style={{width:22,height:22,color:loyaltyMode==='products'?'#1e40af':'#a8a29e'}} />
+                </div>
+                <p style={{fontWeight:700,color:loyaltyMode==='products'?'#1e40af':'#1e3a5f',fontSize:14,marginBottom:4}}>Par produit</p>
+                <p style={{fontSize:12,color:'#78716c'}}>Ex: baguette = 5 pts</p>
+              </button>
+            </div>
+
+            {/* MODE EURO */}
+            {loyaltyMode === 'euro' && (
+              <div>
+                <p style={{fontWeight:600,color:'#1e3a5f',fontSize:14,marginBottom:12}}>Points par euro dépensé</p>
+                <div style={{display:'grid',gridTemplateColumns:'repeat(4,1fr)',gap:10,marginBottom:16}}>
+                  {[1,2,5,10].map(p => (
+                    <button key={p} onClick={() => setPointsPerEuro(p)}
+                      style={{padding:'14px',borderRadius:12,border:pointsPerEuro===p?'2px solid #3b82f6':'2px solid #dbeafe',background:pointsPerEuro===p?'#eff6ff':'#f8faff',fontWeight:700,fontSize:18,color:pointsPerEuro===p?'#1e40af':'#1e3a5f',cursor:'pointer'}}>
+                      {p}
+                    </button>
+                  ))}
+                </div>
+                <div style={{background:'#eff6ff',border:'1px solid #bfdbfe',borderRadius:12,padding:14,textAlign:'center'}}>
+                  <p style={{fontSize:14,color:'#1e3a5f'}}>Pour <strong>10€</strong> dépensés → client gagne <strong style={{color:'#1e40af'}}>{pointsPerEuro * 10} points</strong></p>
+                </div>
               </div>
-              <h2 style={{fontSize:22,fontWeight:800,color:'#1e3a5f',marginBottom:8}}>Combien de points par euro ?</h2>
-              <p style={{color:'#78716c',fontSize:14}}>Vos clients gagneront ces points à chaque achat.</p>
-            </div>
-            <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:12,marginBottom:24}}>
-              {[1,2,5,10].map(p => (
-                <button key={p} onClick={() => setPointsPerEuro(p)}
-                  style={{padding:'20px',borderRadius:16,border:pointsPerEuro===p?'2px solid #3b82f6':'2px solid #dbeafe',background:pointsPerEuro===p?'#eff6ff':'#f8faff',cursor:'pointer',transition:'all 0.2s'}}>
-                  <div style={{fontSize:28,fontWeight:800,color:pointsPerEuro===p?'#1e40af':'#1e3a5f',marginBottom:4}}>{p}</div>
-                  <div style={{fontSize:12,color:'#78716c'}}>point{p>1?'s':''} / €</div>
-                </button>
-              ))}
-            </div>
-            <div style={{background:'#eff6ff',border:'1px solid #bfdbfe',borderRadius:12,padding:16,marginBottom:24,textAlign:'center'}}>
-              <p style={{fontSize:14,color:'#1e3a5f'}}>Pour <strong>10€</strong> dépensés → client gagne <strong style={{color:'#1e40af'}}>{pointsPerEuro * 10} points</strong></p>
-            </div>
-            <button onClick={savePoints} disabled={saving}
-              style={{width:'100%',display:'flex',alignItems:'center',justifyContent:'center',gap:8,padding:'14px',background:'linear-gradient(135deg,#1e40af,#3b82f6)',color:'white',fontWeight:700,fontSize:15,borderRadius:12,border:'none',cursor:saving?'not-allowed':'pointer',opacity:saving?0.7:1}}>
+            )}
+
+            {/* MODE PRODUITS */}
+            {loyaltyMode === 'products' && (
+              <div>
+                <p style={{fontWeight:600,color:'#1e3a5f',fontSize:14,marginBottom:12}}>Vos produits et leurs points</p>
+
+                <div style={{display:'flex',flexDirection:'column',gap:8,marginBottom:16,maxHeight:200,overflowY:'auto'}}>
+                  {products.map((p,i) => (
+                    <div key={i} style={{display:'flex',alignItems:'center',gap:12,padding:'12px 14px',background:'#f8faff',borderRadius:12,border:'1px solid #dbeafe'}}>
+                      <span style={{fontSize:16}}>🥐</span>
+                      <span style={{flex:1,fontWeight:500,color:'#1e3a5f',fontSize:14}}>{p.name}</span>
+                      <span style={{fontWeight:700,color:'#1e40af',fontSize:14}}>{p.points} pts</span>
+                      <button onClick={() => removeProduct(i)} style={{background:'none',border:'none',cursor:'pointer',color:'#e11d48',padding:4}}>
+                        <Trash2 style={{width:14,height:14}} />
+                      </button>
+                    </div>
+                  ))}
+                </div>
+
+                <div style={{display:'flex',gap:8,marginBottom:8}}>
+                  <input value={newProduct.name} onChange={e => setNewProduct(p => ({...p, name: e.target.value}))}
+                    placeholder="Nom du produit" className="input-base" style={{flex:2}} />
+                  <input type="number" value={newProduct.points} onChange={e => setNewProduct(p => ({...p, points: e.target.value}))}
+                    placeholder="Points" className="input-base" style={{flex:1}} />
+                  <button onClick={addProduct}
+                    style={{padding:'10px 14px',background:'#1e40af',color:'white',borderRadius:10,border:'none',cursor:'pointer',flexShrink:0}}>
+                    <Plus style={{width:16,height:16}} />
+                  </button>
+                </div>
+                <p style={{fontSize:12,color:'#a8a29e'}}>Vous pourrez ajouter d'autres produits depuis le dashboard.</p>
+              </div>
+            )}
+
+            <button onClick={saveConfig} disabled={saving || (loyaltyMode==='products' && products.length===0)}
+              style={{width:'100%',display:'flex',alignItems:'center',justifyContent:'center',gap:8,padding:'14px',background:'linear-gradient(135deg,#1e40af,#3b82f6)',color:'white',fontWeight:700,fontSize:15,borderRadius:12,border:'none',cursor:saving?'not-allowed':'pointer',opacity:saving?0.7:1,marginTop:24}}>
               {saving ? <Loader2 style={{width:18,height:18,animation:'spin 1s linear infinite'}} /> : <><ArrowRight style={{width:16,height:16}} /> Enregistrer et continuer</>}
             </button>
           </div>
         )}
 
+        {/* STEP 3 — QR Code prêt */}
         {step === 3 && (
           <div style={{background:'white',borderRadius:24,padding:40,border:'1px solid #dbeafe',boxShadow:'0 20px 60px -20px rgba(30,64,175,0.15)',textAlign:'center'}}>
             <div style={{fontSize:64,marginBottom:16}}>📲</div>
@@ -97,9 +180,9 @@ export default function Onboarding() {
             </div>
             <div style={{display:'flex',flexDirection:'column',gap:12,marginBottom:32}}>
               {[
-                {text:`${pointsPerEuro} point${pointsPerEuro>1?'s':''} par euro configuré`},
-                {text:'QR code prêt à afficher'},
-                {text:'Programme actif immédiatement'},
+                { text: loyaltyMode === 'euro' ? `${pointsPerEuro} point${pointsPerEuro>1?'s':''} par euro configuré` : `${products.length} produits configurés` },
+                { text: 'QR code prêt à afficher' },
+                { text: 'Programme actif immédiatement' },
               ].map((item,i) => (
                 <div key={i} style={{display:'flex',alignItems:'center',gap:12,padding:'10px 16px',background:'#f0fdf4',borderRadius:10}}>
                   <span>✅</span>
