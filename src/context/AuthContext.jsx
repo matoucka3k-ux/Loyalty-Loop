@@ -11,61 +11,109 @@ export function AuthProvider({ children }) {
 
   const fetchProfile = async (userId) => {
     try {
-      const { data } = await supabase.from('profiles').select('*').eq('id', userId).single()
-      setProfile(data)
-      if (data?.role === 'merchant') {
-        const { data: merchantData } = await supabase.from('merchants').select('*').eq('user_id', userId).single()
-        setMerchant(merchantData)
+      const { data: profileData, error: profileError } = await supabase
+        .from('profiles')
+        .select('*')
+        .eq('id', userId)
+        .single()
+
+      if (profileError) throw profileError
+      setProfile(profileData)
+
+      if (profileData?.role === 'merchant') {
+        const { data: merchantData } = await supabase
+          .from('merchants')
+          .select('*')
+          .eq('user_id', userId)
+          .single()
+        setMerchant(merchantData || null)
+      } else {
+        setMerchant(null)
       }
-    } catch (e) {}
+    } catch (e) {
+      console.error('fetchProfile error:', e)
+    }
   }
 
   useEffect(() => {
+    let mounted = true
+
     const init = async () => {
-      const { data: { session } } = await supabase.auth.getSession()
-      if (session?.user) {
-        setUser(session.user)
-        await fetchProfile(session.user.id)
+      try {
+        const { data: { session } } = await supabase.auth.getSession()
+        if (mounted && session?.user) {
+          setUser(session.user)
+          await fetchProfile(session.user.id)
+        }
+      } catch (e) {
+        console.error('init error:', e)
+      } finally {
+        if (mounted) setLoading(false)
       }
-      setLoading(false)
     }
+
     init()
 
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
-      if (event === 'SIGNED_IN' && session?.user) {
-        setUser(session.user)
-        await fetchProfile(session.user.id)
-      } else if (event === 'SIGNED_OUT') {
-        setUser(null)
-        setProfile(null)
-        setMerchant(null)
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(
+      async (event, session) => {
+        if (!mounted) return
+        if (event === 'SIGNED_IN' && session?.user) {
+          setUser(session.user)
+          await fetchProfile(session.user.id)
+          setLoading(false)
+        } else if (event === 'SIGNED_OUT') {
+          setUser(null)
+          setProfile(null)
+          setMerchant(null)
+          setLoading(false)
+        } else if (event === 'TOKEN_REFRESHED' && session?.user) {
+          setUser(session.user)
+        }
       }
-    })
+    )
 
-    return () => subscription.unsubscribe()
+    return () => {
+      mounted = false
+      subscription.unsubscribe()
+    }
   }, [])
 
   const signIn = async ({ email, password }) => {
-    const { data, error } = await supabase.auth.signInWithPassword({ email, password })
+    const { data, error } = await supabase.auth.signInWithPassword({
+      email: email.trim().toLowerCase(),
+      password,
+    })
     if (error) throw error
     return data
   }
 
   const signOut = async () => {
-    await supabase.auth.signOut()
     setUser(null)
     setProfile(null)
     setMerchant(null)
+    await supabase.auth.signOut()
   }
 
   const refreshMerchant = async () => {
     if (!user) return
-    const { data } = await supabase.from('merchants').select('*').eq('user_id', user.id).single()
-    setMerchant(data)
+    const { data } = await supabase
+      .from('merchants')
+      .select('*')
+      .eq('user_id', user.id)
+      .single()
+    if (data) setMerchant(data)
   }
 
   return (
-    <AuthContext.Provider value={{ user, profile, merchant, loading, signIn, signOut, refreshMerchant }}>
+    <AuthContext.Provider value={{
+      user,
+      profile,
+      merchant,
+      loading,
+      signIn,
+      signOut,
+      refreshMerchant,
+    }}>
       {children}
     </AuthContext.Provider>
   )
