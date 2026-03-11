@@ -21,7 +21,6 @@ export function AuthProvider({ children }) {
   }
 
   useEffect(() => {
-    // Restaurer la session existante au chargement
     const init = async () => {
       const { data: { session } } = await supabase.auth.getSession()
       if (session?.user) {
@@ -32,7 +31,6 @@ export function AuthProvider({ children }) {
     }
     init()
 
-    // Écouter les changements d'auth
     const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
       if (event === 'SIGNED_IN' && session?.user) {
         setUser(session.user)
