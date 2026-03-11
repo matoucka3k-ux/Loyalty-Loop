@@ -219,3 +219,13 @@ export default function Onboarding() {
             </div>
             <button onClick={() => navigate('/dashboard')}
               style={{width:'100%',display:'flex',alignItems:'center',justifyContent:'center',gap:8,padding:'14px',background:'linear-gradient(135deg,#1e40af,#3b82f6)',color:'white',fontW
+                >
+              <Sparkles style={{width:16,height:16}} /> Acceder a mon dashboard
+            </button>
+          </div>
+        )}
+
+      </div>
+    </div>
+  )
+}
