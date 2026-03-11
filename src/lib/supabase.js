@@ -11,6 +11,6 @@ export const supabase = createClient(supabaseUrl, supabaseAnonKey, {
     storage: localStorage,
   },
 })
-}
+
 
 
